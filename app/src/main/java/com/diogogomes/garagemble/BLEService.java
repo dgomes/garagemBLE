@@ -22,8 +22,10 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.ParcelUuid;
 import android.util.Log;
 import android.util.Pair;
+import android.widget.Toast;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -142,10 +144,13 @@ public class BLEService extends Service {
     private ScanCallback mScanCallback = new ScanCallback() {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
-//            Log.i(TAG, "callbackType " + String.valueOf(callbackType));
-//            Log.i(TAG, "result: " +result.toString());
+            Log.i(TAG, "callbackType " + String.valueOf(callbackType));
+            Log.i(TAG, "result: " + result.toString());
             BluetoothDevice btDevice = result.getDevice();
-            connectToDevice(btDevice);
+            if(btDevice.getAddress().toString().startsWith("F2:9B:4B")) {
+                connectToDevice(btDevice);
+                Log.e(TAG, "BT address: " + btDevice.getAddress());
+            }
         }
 
         @Override
@@ -174,7 +179,9 @@ public class BLEService extends Service {
 
     public void connectToDevice(BluetoothDevice device) {
         if (mGatt == null) {
+            Log.e(TAG, "mGatt is null ?");
             mGatt = device.connectGatt(this, false, gattCallback);
+
             scanLeDevice(false);// will stop after first device detection
         }
     }
@@ -182,7 +189,7 @@ public class BLEService extends Service {
     private final BluetoothGattCallback gattCallback = new BluetoothGattCallback() {
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
-            //Log.d(TAG, "onConnectionStateChange - Status: " + status);
+            Log.d(TAG, "onConnectionStateChange - Status: " + status);
             switch (newState) {
                 case BluetoothProfile.STATE_CONNECTED:
                     Log.i(TAG, "STATE_CONNECTED");
@@ -208,7 +215,7 @@ public class BLEService extends Service {
 
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
-            //Log.d(TAG, "onServicesDiscovered() status = " + status);
+            Log.d(TAG, "onServicesDiscovered() status = " + status);
             List<BluetoothGattService> services = gatt.getServices();
             mGattCharacteristics = new HashMap<>();
 
@@ -403,6 +410,10 @@ public class BLEService extends Service {
         Log.d(TAG, "getIV()");
         if(mGattCharacteristics==null)
             return;
+        if (mGattCharacteristics.get(GaragemGattAttributes.SECURITY_SERVICE) == null) {
+            Toast.makeText(getApplication().getApplicationContext(), "WRONG DEVICE", Toast.LENGTH_SHORT).show();
+            return;
+        }
         BluetoothGattCharacteristic c = mGattCharacteristics.get(GaragemGattAttributes.SECURITY_SERVICE).get(GaragemGattAttributes.SECURITY_IV_CHARACTERISTIC_UUID);
         communicate(BluetoothCommunicationType.READ, c);
     }
