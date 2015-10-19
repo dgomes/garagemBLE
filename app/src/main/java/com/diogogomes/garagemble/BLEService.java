@@ -351,7 +351,7 @@ public class BLEService extends Service {
 
         switch (e.first) {
             case READ:
-                if(!mGatt.readCharacteristic(e.second)) {// Skiping characteristics that fail (usually due to permissions...)
+                if(!mGatt.readCharacteristic(e.second)) {// Skipping characteristics that fail (usually due to permissions...)
                     Log.e(TAG, "error reading " + e.second.getUuid());
                     bluetoothCommandsQueue.remove();
                     processNextInQueue();
