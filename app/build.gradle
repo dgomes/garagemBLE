@@ -1,14 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 22
+    compileSdkVersion 23
     buildToolsVersion "22.0.0"
 
     defaultConfig {
         applicationId "com.diogogomes.garagemble"
         minSdkVersion 18
-        targetSdkVersion 22
-        versionCode 1
+        targetSdkVersion 20
+        versionCode 3
         versionName "1.0"
     }
     buildTypes {
